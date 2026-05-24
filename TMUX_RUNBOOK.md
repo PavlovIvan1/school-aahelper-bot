@@ -11,6 +11,14 @@ chmod +x run_tmux.sh
 ./run_tmux.sh
 ```
 
+Если ошибка `bash\r: No such file or directory` — у файла Windows-переводы строк. На сервере:
+
+```bash
+sed -i 's/\r$//' run_tmux.sh
+chmod +x run_tmux.sh
+./run_tmux.sh
+```
+
 На сервере можно задать каталог явно:
 
 ```bash
