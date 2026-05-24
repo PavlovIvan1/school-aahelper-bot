@@ -7,16 +7,29 @@ cd /path/to/school-aahelperbot
 cp .env.example .env   # если ещё нет
 # отредактируйте .env — BOT_TOKEN
 
-chmod +x run_tmux.sh
+git pull
+bash after_pull.sh    # после каждого pull (убирает CRLF из .sh)
 ./run_tmux.sh
 ```
 
-Если ошибка `bash\r: No such file or directory` — у файла Windows-переводы строк. На сервере:
+### Почему после `git pull` ломается `run_tmux.sh`
+
+Файл когда-то попал в репозиторий с окончаниями строк Windows (`CRLF`). На Linux shebang читается как `bash\r` → ошибка `/usr/bin/env: 'bash\r'`.
+
+**На сервере после pull:**
 
 ```bash
-sed -i 's/\r$//' run_tmux.sh
-chmod +x run_tmux.sh
-./run_tmux.sh
+bash after_pull.sh
+# или одной строкой:
+sed -i 's/\r$//' run_tmux.sh && chmod +x run_tmux.sh
+```
+
+**Один раз у того, кто коммитит (Windows/WSL), чтобы больше не тащить CRLF:**
+
+```bash
+git add --renormalize .
+git commit -m "Normalize line endings to LF"
+git push
 ```
 
 На сервере можно задать каталог явно:
