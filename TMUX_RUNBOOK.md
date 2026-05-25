@@ -72,11 +72,16 @@ tmux kill-session -t aahelper-bot
 tmux capture-pane -pt aahelper-bot | tail -n 40
 ```
 
-## Прокси (опционально)
+## Прокси (для РФ)
+
+По умолчанию тот же прокси, что у `school-aabot` (см. `TELEGRAM_PROXY_URL` в `.env`).
 
 ```bash
-TELEGRAM_PROXY_URL='http://user:pass@host:port' ./run_tmux.sh
+# в .env:
+TELEGRAM_PROXY_URL=http://user:pass@host:port
 ```
+
+`run_tmux.sh` пробрасывает `TELEGRAM_PROXY_URL`, `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY` в процесс бота.
 
 ## Переменные
 
