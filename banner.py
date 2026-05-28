@@ -3,7 +3,7 @@ from pathlib import Path
 import config
 
 PREFERRED_BANNER_NAMES = (
-    "служба поддержки.jpg",
+    "поддержка_баннер.jpg",
     "banner.jpg",
 )
 
