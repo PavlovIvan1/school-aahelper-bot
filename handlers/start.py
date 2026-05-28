@@ -2,6 +2,7 @@ import logging
 
 from aiogram import F, Router
 from aiogram.filters import CommandStart
+from aiogram.fsm.context import FSMContext
 from aiogram.types import CallbackQuery, FSInputFile, Message
 
 import keyboard
@@ -31,12 +32,14 @@ async def send_welcome(target: Message) -> None:
 
 
 @router.message(CommandStart())
-async def cmd_start(message: Message) -> None:
+async def cmd_start(message: Message, state: FSMContext) -> None:
+    await state.clear()
     await send_welcome(message)
 
 
 @router.callback_query(F.data == "main")
-async def back_to_main(call: CallbackQuery) -> None:
+async def back_to_main(call: CallbackQuery, state: FSMContext) -> None:
+    await state.clear()
     await call.answer()
     try:
         await call.message.delete()

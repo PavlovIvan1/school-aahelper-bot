@@ -5,17 +5,15 @@ from aiogram.filters import StateFilter
 from aiogram.types import CallbackQuery, Message
 
 import keyboard
-from texts import (
-    SUPPORT_CALL_BOOKING_TEXT,
-    SUPPORT_CHAT_PROMPT,
-    SUPPORT_CHAT_STUB_REPLY,
-)
+import omnidesk
+from texts import SUPPORT_CALL_BOOKING_TEXT, SUPPORT_CHAT_PROMPT
 
 router = Router()
 
 
 class SupportChat(StatesGroup):
     waiting_question = State()
+    in_chat = State()
 
 
 async def _edit_or_answer(
@@ -54,10 +52,19 @@ async def write_support(call: CallbackQuery, state: FSMContext) -> None:
     await state.update_data(prompt_message_id=msg.message_id)
 
 
-@router.message(StateFilter(SupportChat.waiting_question))
-async def support_question_stub(message: Message, state: FSMContext) -> None:
-    await state.clear()
+@router.message(StateFilter(SupportChat.waiting_question, SupportChat.in_chat))
+async def support_message_to_omnidesk(message: Message, state: FSMContext) -> None:
+    update = omnidesk.message_to_telegram_update(message)
+    handled = await omnidesk.forward_to_omnidesk(update)
+
+    if handled:
+        current = await state.get_state()
+        if current == SupportChat.waiting_question.state:
+            await state.set_state(SupportChat.in_chat)
+        return
+
     await message.answer(
-        SUPPORT_CHAT_STUB_REPLY,
-        reply_markup=keyboard.main_menu_keyboard(),
+        "Не удалось отправить сообщение в поддержку. "
+        "Попробуйте ещё раз или нажмите «Назад».",
+        reply_markup=keyboard.back_to_main_keyboard(),
     )

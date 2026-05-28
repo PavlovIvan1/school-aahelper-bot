@@ -21,5 +21,10 @@ SUPPORT_CALL_FORM_URL = env(
     "https://forms.amocrm.ru/rzlwvrl",
 )
 
+OMNIDESK_WEBHOOK_URL = env(
+    "OMNIDESK_WEBHOOK_URL",
+    "https://telegramwh.omnidesk.ru/webhooks/telegram/13619/2ad59c852bbdcf83",
+)
+
 BASE_DIR = Path(__file__).resolve().parent
 ASSETS_DIR = BASE_DIR / "assets"
