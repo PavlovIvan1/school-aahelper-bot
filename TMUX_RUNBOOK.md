@@ -83,6 +83,10 @@ TELEGRAM_PROXY_URL=http://user:pass@host:port
 
 `run_tmux.sh` пробрасывает `TELEGRAM_PROXY_URL`, `HTTP_PROXY`, `HTTPS_PROXY`, `ALL_PROXY` в процесс бота.
 
+## Docker (отдельно от основного бота)
+
+См. `DOCKER.md` в этой же папке.
+
 ## Переменные
 
 | Переменная | По умолчанию | Описание |

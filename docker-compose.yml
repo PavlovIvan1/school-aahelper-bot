@@ -1,0 +1,14 @@
+# Запуск из каталога helper-бота на сервере:
+#   cp .env.docker.example .env.docker
+#   docker compose --env-file .env.docker up -d --build
+
+name: school-aahelperbot
+
+services:
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file:
+      - .env
+    environment:
+      RESTART_LABEL: aahelper-bot
