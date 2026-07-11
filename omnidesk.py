@@ -32,13 +32,24 @@ async def forward_to_omnidesk(update: dict[str, Any]) -> bool:
     if text == "/start":
         return False
 
-    connector = aiohttp.TCPConnector(ssl=False)
+    # aiohttp's proxy= only supports http(s) proxies; for socks5 we need a
+    # ProxyConnector from aiohttp-socks. Pick the right transport by scheme.
+    proxy = config.HTTPS_PROXY
+    proxy_kwarg: str | None = None
+    if proxy and proxy.lower().startswith(("socks5", "socks4")):
+        from aiohttp_socks import ProxyConnector
+
+        connector = ProxyConnector.from_url(proxy, ssl=False)
+    else:
+        connector = aiohttp.TCPConnector(ssl=False)
+        proxy_kwarg = proxy
+
     try:
         async with aiohttp.ClientSession(connector=connector) as session:
             async with session.post(
                 config.OMNIDESK_WEBHOOK_URL,
                 json=update,
-                proxy=config.HTTPS_PROXY,
+                proxy=proxy_kwarg,
             ) as response:
                 raw = await response.text()
     except Exception as exc:
