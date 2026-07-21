@@ -106,7 +106,7 @@ $("broadcast-form").addEventListener("submit", async (e) => {
     showDenied();
     return;
   }
-  const auth = await api("/api/auth");
+  const auth = await api("/api/auth", { method: "POST", body: {} });
   if (!auth.ok) {
     showDenied();
     return;
