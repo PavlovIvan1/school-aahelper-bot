@@ -1,0 +1,47 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Рассылка · Admin</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<link rel="stylesheet" href="style.css" />
+</head>
+<body>
+<div id="app">
+  <p id="loading" class="hint">Загрузка…</p>
+
+  <div id="denied" class="hidden">
+    <p>Доступ только для администраторов.</p>
+  </div>
+
+  <div id="panel" class="hidden">
+    <header>
+      <h1>Рассылка</h1>
+      <span id="stats" class="pill"></span>
+    </header>
+
+    <form id="broadcast-form">
+      <textarea id="text" placeholder="Текст сообщения" rows="6" maxlength="4000" required></textarea>
+      <div class="row">
+        <input id="button_text" type="text" placeholder="Текст кнопки (необязательно)" />
+        <input id="button_url" type="url" placeholder="Ссылка кнопки (необязательно)" />
+      </div>
+      <button type="submit" id="send-btn">Отправить всем</button>
+    </form>
+
+    <div id="progress" class="hidden">
+      <div class="bar"><div class="bar-fill" id="bar-fill"></div></div>
+      <p id="progress-text" class="hint"></p>
+    </div>
+
+    <section id="history">
+      <h2>История рассылок</h2>
+      <ul id="history-list"></ul>
+    </section>
+  </div>
+</div>
+<script src="config.js"></script>
+<script src="app.js"></script>
+</body>
+</html>

@@ -1,4 +1,4 @@
-from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup
+from aiogram.types import InlineKeyboardButton, InlineKeyboardMarkup, WebAppInfo
 from aiogram.utils.keyboard import InlineKeyboardBuilder
 
 import config
@@ -24,6 +24,17 @@ def main_menu_keyboard() -> InlineKeyboardMarkup:
 def back_to_main_keyboard() -> InlineKeyboardMarkup:
     builder = InlineKeyboardBuilder()
     builder.row(InlineKeyboardButton(text="🔙 Назад", callback_data="main"))
+    return builder.as_markup()
+
+
+def admin_panel_keyboard() -> InlineKeyboardMarkup:
+    builder = InlineKeyboardBuilder()
+    builder.row(
+        InlineKeyboardButton(
+            text="🛠 Открыть панель",
+            web_app=WebAppInfo(url=config.ADMIN_WEBAPP_URL),
+        )
+    )
     return builder.as_markup()
 
 
