@@ -8,7 +8,7 @@ const $ = (id) => document.getElementById(id);
 
 async function api(path, { method = "GET", body } = {}) {
   const initData = (tg && tg.initData) || "";
-  let url = `${API_BASE_URL}${path}`;
+  let url = path;
   const options = { method, headers: {} };
 
   if (method === "GET") {

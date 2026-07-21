@@ -17,23 +17,6 @@ logger = logging.getLogger(__name__)
 routes = web.RouteTableDef()
 
 
-def _cors_headers() -> dict[str, str]:
-    return {
-        "Access-Control-Allow-Origin": config.CORS_ALLOWED_ORIGIN,
-        "Access-Control-Allow-Methods": "GET, POST, OPTIONS",
-        "Access-Control-Allow-Headers": "Content-Type",
-    }
-
-
-@web.middleware
-async def cors_middleware(request: web.Request, handler):
-    if request.method == "OPTIONS":
-        return web.Response(headers=_cors_headers())
-    response = await handler(request)
-    response.headers.update(_cors_headers())
-    return response
-
-
 def _require_admin(init_data: str) -> dict[str, Any] | None:
     payload = validate_init_data(init_data, config.BOT_TOKEN)
     if not payload or not payload.get("user"):
@@ -115,10 +98,16 @@ async def api_broadcasts(request: web.Request) -> web.Response:
     return web.json_response({"ok": True, "broadcasts": rows})
 
 
+@routes.get("/")
+async def index(request: web.Request) -> web.Response:
+    return web.FileResponse(config.ADMIN_WEBAPP_DIR / "index.html")
+
+
 def create_app(bot: Bot) -> web.Application:
-    app = web.Application(middlewares=[cors_middleware])
+    app = web.Application()
     app["bot"] = bot
     app.add_routes(routes)
+    app.router.add_static("/", config.ADMIN_WEBAPP_DIR)
     return app
 
 
