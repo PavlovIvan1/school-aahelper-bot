@@ -16,3 +16,12 @@ services:
       - "${WEBAPP_API_PORT:-8080}:8080"
     volumes:
       - ./data:/app/data
+
+  # Даёт HTTPS-адрес (xxx.trycloudflare.com) для admin API без своего домена.
+  # URL печатается в логах: docker compose logs -f cloudflared
+  cloudflared:
+    image: cloudflare/cloudflared:latest
+    restart: unless-stopped
+    command: tunnel --no-autoupdate --url http://bot:8080
+    depends_on:
+      - bot
