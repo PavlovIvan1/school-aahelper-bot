@@ -30,9 +30,18 @@ CREATE TABLE IF NOT EXISTS broadcasts (
     sent INTEGER NOT NULL DEFAULT 0,
     failed INTEGER NOT NULL DEFAULT 0,
     created_at TEXT NOT NULL,
-    finished_at TEXT
+    finished_at TEXT,
+    media_kind TEXT NOT NULL DEFAULT 'none',
+    excluded_count INTEGER NOT NULL DEFAULT 0
 );
 """
+
+# (таблица, колонка, объявление типа) — добавляются в уже существующие БД,
+# т.к. CREATE TABLE IF NOT EXISTS их не тронет.
+_MIGRATIONS = (
+    ("broadcasts", "media_kind", "TEXT NOT NULL DEFAULT 'none'"),
+    ("broadcasts", "excluded_count", "INTEGER NOT NULL DEFAULT 0"),
+)
 
 
 def _now() -> str:
@@ -49,11 +58,20 @@ async def _connect() -> AsyncIterator[aiosqlite.Connection]:
         await db_conn.close()
 
 
+async def _run_migrations(conn: aiosqlite.Connection) -> None:
+    for table, column, decl in _MIGRATIONS:
+        async with conn.execute(f"PRAGMA table_info({table})") as cursor:
+            existing = {row[1] async for row in cursor}
+        if column not in existing:
+            await conn.execute(f"ALTER TABLE {table} ADD COLUMN {column} {decl}")
+
+
 async def init_db() -> None:
     config.DATA_DIR.mkdir(parents=True, exist_ok=True)
     async with _connect() as conn:
         await conn.execute("PRAGMA journal_mode=WAL")
         await conn.executescript(_SCHEMA)
+        await _run_migrations(conn)
         await conn.commit()
 
 
@@ -99,13 +117,33 @@ async def count_users(include_blocked: bool = False) -> int:
             return row[0] if row else 0
 
 
-async def get_active_user_ids() -> list[int]:
+async def get_active_user_ids(exclude_ids: set[int] | None = None) -> list[int]:
     async with _connect() as conn:
         async with conn.execute(
             "SELECT telegram_id FROM users WHERE is_blocked = 0"
         ) as cursor:
             rows = await cursor.fetchall()
-            return [r[0] for r in rows]
+    ids = [r[0] for r in rows]
+    if exclude_ids:
+        ids = [tid for tid in ids if tid not in exclude_ids]
+    return ids
+
+
+async def list_users(limit: int = 1000) -> list[dict[str, Any]]:
+    async with _connect() as conn:
+        conn.row_factory = aiosqlite.Row
+        async with conn.execute(
+            """
+            SELECT telegram_id, username, first_name, last_name, last_seen
+            FROM users
+            WHERE is_blocked = 0
+            ORDER BY last_seen DESC
+            LIMIT ?
+            """,
+            (limit,),
+        ) as cursor:
+            rows = await cursor.fetchall()
+            return [dict(r) for r in rows]
 
 
 async def create_broadcast(
@@ -114,14 +152,17 @@ async def create_broadcast(
     button_text: str | None,
     button_url: str | None,
     total: int,
+    media_kind: str = "none",
+    excluded_count: int = 0,
 ) -> int:
     async with _connect() as conn:
         cursor = await conn.execute(
             """
-            INSERT INTO broadcasts (admin_id, text, button_text, button_url, status, total, created_at)
-            VALUES (?, ?, ?, ?, 'pending', ?, ?)
+            INSERT INTO broadcasts
+                (admin_id, text, button_text, button_url, status, total, created_at, media_kind, excluded_count)
+            VALUES (?, ?, ?, ?, 'pending', ?, ?, ?, ?)
             """,
-            (admin_id, text, button_text, button_url, total, _now()),
+            (admin_id, text, button_text, button_url, total, _now(), media_kind, excluded_count),
         )
         await conn.commit()
         return cursor.lastrowid

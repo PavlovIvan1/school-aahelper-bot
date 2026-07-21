@@ -22,11 +22,34 @@
     </header>
 
     <form id="broadcast-form">
-      <textarea id="text" placeholder="Текст сообщения" rows="6" maxlength="4000" required></textarea>
-      <div class="row">
+      <div class="toolbar" id="toolbar">
+        <button type="button" data-tag="b" title="Жирный"><b>B</b></button>
+        <button type="button" data-tag="i" title="Курсив"><i>I</i></button>
+        <button type="button" data-tag="u" title="Подчёркнутый"><u>U</u></button>
+        <button type="button" data-tag="s" title="Зачёркнутый"><s>S</s></button>
+        <button type="button" data-tag="tg-spoiler" title="Спойлер">🙈</button>
+        <button type="button" data-tag="code" title="Моноширинный">&lt;/&gt;</button>
+      </div>
+      <textarea id="text" placeholder="Текст сообщения" rows="6" maxlength="4000"></textarea>
+
+      <label class="file-label" for="media">
+        <input id="media" type="file" multiple accept="image/*,video/*" hidden />
+        <span>📎 Прикрепить фото / гифку / видео (необязательно)</span>
+      </label>
+      <div id="media-preview" class="media-preview"></div>
+      <p id="media-hint" class="hint hidden">Несколько файлов уйдут альбомом — без кнопки и без гифки в альбоме.</p>
+
+      <div class="row" id="button-row">
         <input id="button_text" type="text" placeholder="Текст кнопки (необязательно)" />
         <input id="button_url" type="url" placeholder="Ссылка кнопки (необязательно)" />
       </div>
+
+      <details id="users-section">
+        <summary>Получатели: <span id="users-count">0 из 0</span> · исключить кого-то</summary>
+        <input type="text" id="users-filter" placeholder="Поиск по имени или username" />
+        <div id="users-list" class="users-list"></div>
+      </details>
+
       <button type="submit" id="send-btn">Отправить всем</button>
     </form>
 
